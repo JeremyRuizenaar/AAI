@@ -1,5 +1,7 @@
 import numpy as np
 import random
+import matplotlib.pyplot as plt
+
 
 data = np.genfromtxt('dataset1.csv', delimiter=';', usecols=[1,2,3,4,5,6,7])
 for ele in data:
@@ -48,7 +50,7 @@ for label in dates:
 def getRandomCentroids(trainingData, Kcentroids = 1, first= " "   ):
 
     if first == "empty":
-        print("create empty list")
+        # print("create empty list")
         emptyTupleList = []
         emptyList = [0 for x in range(0, len(data[0]))]
 
@@ -59,9 +61,29 @@ def getRandomCentroids(trainingData, Kcentroids = 1, first= " "   ):
 
         centroids = []
         for i in range(0, Kcentroids):
-            rng = random.randint(0, len(trainingData))
+            rng = random.randint(0, len(trainingData)-1)
             centroids.append( ( i ,  trainingData[rng] ))
         return centroids
+
+
+def intraClusterDistance(centroids, clusteredExamples):
+    resultList = []
+    totalIntraDist = 0
+    for centroid in centroids:
+        result = 0
+        intraCentroidDist = 0
+
+        for example in clusteredExamples:
+
+            if example[1] == centroid[0]:
+                result = calculateDistance(example[0], centroid[1])
+                result = result * result
+                intraCentroidDist += result
+
+        totalIntraDist += intraCentroidDist
+        # print("total intra distance for cluster ", centroid[0], " = ", intraCentroidDist)
+    return totalIntraDist
+
 
 
 
@@ -73,18 +95,28 @@ def getClusterRepresentation(centroids, clusteredExamples):
 
     for centroid in centroids:
         representation = {}
-        print(" centroid ", centroid[0], "  with data ", centroid[1])
+        centroidCounter = 0
+        # print(" centroid ", centroid[0], "  with data ", centroid[1])
         for example in clusteredExamples:
 
             if example[1] == centroid[0]:
-                print("  and example  ", example)
+                centroidCounter +=1
+                # print("  and example  ", example)
                 if example[2] in representation.keys():
                     representation[example[2]] += 1
 
                 else:
                     representation[example[2]] = 1
 
-        print("cluster ", centroid[0] ," has vote count ", representation)
+        #print("cluster ", centroid[0] ," has vote count ", representation)
+        print("cluster ", centroid[0])
+        keys = representation.keys()
+        list = []
+        for each in keys:
+            list.append(each)
+        for key in list:
+            val = representation[key]
+            print(key , " has % ", (( val / centroidCounter) * 100 )  )
 
 
 
@@ -106,49 +138,54 @@ def cluster(data, centroids, oldCentroids, assignedList):
 
     if stableCounter == totalField:
         print("all centroid means are  stable exiting recursion ")
-        getClusterRepresentation(centroids, assignedList )
+        getClusterRepresentation(centroids, assignedList)
+        tmp = intraClusterDistance(centroids, assignedList)
+        #print("intra cluster (cluster) ",tmp)
+        Gholder.append( (  len(centroids) ,tmp) )
+        return 0
+
+    else:
 
 
-        return None
 
 
 
-    assignedExampleList = []
-    counter = 0
-    for example in data[0]:
-        nCentroid = sorted(getDistancesToCentroids(example , centroids ))[0][1]
-        assignedExampleList.append((example, nCentroid, data[1][counter]))
-        counter += 1
-
-
-    newCentroids = []
-
-    for centroid in centroids:
-        means = [0 for i in range(0, len(centroid[1]))]
-        regionTotal = 0
-
-        for example in assignedExampleList:
-
-            if  example[1] == centroid[0]:
-                counter = 0
-                regionTotal += 1
-                for ele in example[0]:
-                    means[counter] += ele
-                    counter+= 1
-
-
-        if regionTotal == 0:
-            #print("no data bount to region " , centroid[0])
-            regionTotal = 1
-
+        assignedExampleList = []
         counter = 0
-        for ele in means:
-            means[counter] = means[counter] / regionTotal
+        for example in data[0]:
+            nCentroid = sorted(getDistancesToCentroids(example , centroids ))[0][1]
+            assignedExampleList.append((example, nCentroid, data[1][counter]))
             counter += 1
 
-        newCentroids.append(( centroid[0] , means ))
-    print("new centroids ", newCentroids)
-    cluster(data, newCentroids, centroids, assignedExampleList)
+
+        newCentroids = []
+
+        for centroid in centroids:
+            means = [0 for i in range(0, len(centroid[1]))]
+            regionTotal = 0
+
+            for example in assignedExampleList:
+
+                if  example[1] == centroid[0]:
+                    counter = 0
+                    regionTotal += 1
+                    for ele in example[0]:
+                        means[counter] += ele
+                        counter+= 1
+
+
+            if regionTotal == 0:
+                #print("no data bount to region " , centroid[0])
+                regionTotal = 1
+
+            counter = 0
+            for ele in means:
+                means[counter] = means[counter] / regionTotal
+                counter += 1
+
+            newCentroids.append(( centroid[0] , means ))
+        # print("new centroids ", newCentroids)
+        cluster(data, newCentroids, centroids, assignedExampleList)
 
 
 
@@ -217,8 +254,19 @@ def extractMostRepresented(occurrencesDict):
     else:
         return occurrenceList[0]
 
-cluster( (data, labels), getRandomCentroids(data, Kcentroids=4) , getRandomCentroids(data, Kcentroids= 4, first="empty"), [] )
 
 
 
+scree = []
+for x in range(1, 10):
+    Gholder = []
+    cluster( (data, labels), getRandomCentroids(data, Kcentroids=x) , getRandomCentroids(data, Kcentroids= x, first="empty"), [] )
+    scree.append(Gholder[0])
+print(scree)
+
+plotlist = [ scree[x][1] for x in range(0 , len(scree)) ]
+plt.plot(plotlist)
+plt.ylabel('intra squaredcentroid distance')
+plt.xlabel('k value')
+plt.show()
 

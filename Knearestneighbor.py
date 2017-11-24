@@ -124,6 +124,7 @@ def getCorrectMatches(k):
         if result == None:
             return None
         elif result == validationlabels[index]:
+            print("validation ", index , " has label ", result, " correctly matched ")
             matches +=1
         elif result != validationlabels[index]:
             pass
@@ -153,7 +154,8 @@ def findBestK():
             return tuple
     # best k is 58 with 66% most
 
-for x in range(0,50):
-    print(findBestK())
+# for x in range(0,50):
+#print(findBestK())
+print("correctly matched ", getCorrectMatches(58))
 
 
