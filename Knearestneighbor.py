@@ -2,6 +2,11 @@ import numpy as np
 import random
 
 data = np.genfromtxt('dataset1.csv', delimiter=';', usecols=[1,2,3,4,5,6,7])
+for ele in data:
+    if ele[6] == -1:
+        ele[6] = 0
+    if ele[4] == -1:
+        ele[0] = 0
 dates = np.genfromtxt('dataset1.csv', delimiter=';', usecols=[0])
 
 labels = []
@@ -21,6 +26,11 @@ for label in dates:
 
 
 validationdata = np.genfromtxt('validation1.csv', delimiter=';', usecols=[1,2,3,4,5,6,7])
+for ele in validationdata:
+    if ele[6] == -1:
+        ele[6] = 0
+    if ele[4] == -1:
+        ele[0] = 0
 validationdates = np.genfromtxt('validation1.csv', delimiter=';', usecols=[0])
 validationlabels = []
 
@@ -127,7 +137,7 @@ def calculatePercentage(a, total):
 def findBestK():
     # Get the correct % of each K value
     resultList = []
-    for k in range(58,59):
+    for k in range(57,60):
         print("validating k = ", k)
         resultList.append((k, calculatePercentage(getCorrectMatches(k), len(validationlabels))))
 
@@ -143,7 +153,7 @@ def findBestK():
             return tuple
     # best k is 58 with 66% most
 
-
-print(findBestK())
+for x in range(0,50):
+    print(findBestK())
 
 
