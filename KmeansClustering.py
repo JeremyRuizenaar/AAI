@@ -89,10 +89,6 @@ def intraClusterDistance(centroids, clusteredExamples):
 
 def getClusterRepresentation(centroids, clusteredExamples):
     print("cluster representation")
-    # print(centroids)
-    # print(clusteredExamples)
-     #[ 0 for x in range(0, len(centroids))]
-
     for centroid in centroids:
         representation = {}
         centroidCounter = 0
@@ -101,7 +97,7 @@ def getClusterRepresentation(centroids, clusteredExamples):
 
             if example[1] == centroid[0]:
                 centroidCounter +=1
-                # print("  and example  ", example)
+
                 if example[2] in representation.keys():
                     representation[example[2]] += 1
 
@@ -111,10 +107,7 @@ def getClusterRepresentation(centroids, clusteredExamples):
         #print("cluster ", centroid[0] ," has vote count ", representation)
         print("cluster ", centroid[0])
         keys = representation.keys()
-        list = []
-        for each in keys:
-            list.append(each)
-        for key in list:
+        for key in keys:
             val = representation[key]
             print(key , " has % ", (( val / centroidCounter) * 100 )  )
 
@@ -140,15 +133,10 @@ def cluster(data, centroids, oldCentroids, assignedList):
         print("all centroid means are  stable exiting recursion ")
         getClusterRepresentation(centroids, assignedList)
         tmp = intraClusterDistance(centroids, assignedList)
-        #print("intra cluster (cluster) ",tmp)
         Gholder.append( (  len(centroids) ,tmp) )
         return 0
 
     else:
-
-
-
-
 
         assignedExampleList = []
         counter = 0
@@ -258,7 +246,7 @@ def extractMostRepresented(occurrencesDict):
 
 
 scree = []
-for x in range(1, 10):
+for x in range(1, 20):
     Gholder = []
     cluster( (data, labels), getRandomCentroids(data, Kcentroids=x) , getRandomCentroids(data, Kcentroids= x, first="empty"), [] )
     scree.append(Gholder[0])
