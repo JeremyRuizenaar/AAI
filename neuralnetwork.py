@@ -30,6 +30,10 @@ class Neuron:
 
 
 
+
+
+
+
 class BNeuron:
 
     def __init__(self, weights, treshold):
@@ -46,6 +50,8 @@ class BNeuron:
 
         return result
 
+    def update(self):
+
 
 
     def act(self, input):
@@ -53,9 +59,6 @@ class BNeuron:
             return 1
         else:
             return 0
-
-
-
 
 
 #adder
@@ -75,8 +78,6 @@ inverter2 = BNeuron([-2] , -1)
 a = 1
 b = 1
 print( AndGate1.act([OrGate1.act([a, b]) , OrGate2.act([inverter1.act([a])  , inverter2.act([b])])]), AndGate2.act([a, b]) )
-
-
 
 
 # norgate out of perceptron
