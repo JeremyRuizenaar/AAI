@@ -48,33 +48,23 @@ class Neuron:
 
             self.weights[x] += tmp
 
-
-        # a = self.subtractList(self.oldWeights, self.weights)
-        # # print(a)
-        # if sum(a) <= 0.01:
-        #     print("converged")
-        #     # return True
-
         print("new weights = " ,self.weights)
-        print("-" * 50)
-        print()
+        #print("-" * 50)
+        #print()
 
     def sigmoid(self, x):
         return 1 / (1 + exp(-x))
 
     def act(self, input):
-        #bias = 3
         res = self.sigmoid(sum(self.weightMultiplier(input)) + self.bias)
         return  res
 
 class Network:
 
     def __init__(self, it):
-        #self.norGate = Neuron([random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)], 0)
         self.iterations = it
         # self.trainingSet = [[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1], [1, 0, 0],[1, 0, 1], [1, 1, 0] ,[1,1, 1]]
         # self.trainingAnswer = [1, 0, 0, 0, 0, 0, 0, 0]
-
         self.trainingSet = [[0, 0, 0, 1], [0, 0, 0, 0], [0, 1, 0, 0], [0,0, 1, 0], [1, 0, 0, 0]]
         self.trainingAnswer = [0, 1, 0, 0, 0]
         #self.trainingAnswer = [1, 0, 1, 1,1]
@@ -98,36 +88,27 @@ class Network:
         print()
 
         for x in range(0, self.iterations):
-            print("-"*25, x , "-"*25)
+            #print("-"*25, x , "-"*25)
             i = 0
-            cumError = 0
+            cumulativeError = 0
 
             for data in self.trainingSet:
-                print("desired result = ", self.trainingAnswer[i])
-
                 result = float(self.think(data))
-                print("result = ", result)
+                cumulativeError += math.pow((self.trainingAnswer[i] - result), 2)
+                #print("desired result = ", self.trainingAnswer[i])
+                #print("result = ", result)
+                #print("cumulativeError() = ", cumulativeError)
 
-                cumError += math.pow((self.trainingAnswer[i] - result), 2)
-                print("cumError() = ", cumError)
-
-                if self.norGate.update( data , sum(data), result , self.trainingAnswer[i] ) == True:
-                    print("done traing")
-                    return
+                self.norGate.update( data , sum(data), result , self.trainingAnswer[i] )
                 i += 1
 
-            if cumError < 0.01:
-                print("cum error is low")
+            if cumulativeError < 0.01:
                 return True
-
-            print("cumError(total) = ", cumError)
-
-
+            #print("cumulativeError(total) = ", cumulativeError)
 
         print("done traing")
 
     def think(self,input):
-        print("thinking about ", input)
         return self.norGate.act(input)
 
 
@@ -136,19 +117,19 @@ class Network:
 a = Network(1000000)
 a.showWeights()
 a.train()
-print(a.think([0,0,0,0]))#
+print("result(",[0,0,0,0],") = ", a.think([0,0,0,0]))#
 print()
-print(a.think([0,0,1,1]))
+print("result(",[0,0,1,1],") = ", a.think([0,0,1,1]))
 print()
-print(a.think([0,1,1,0]))
+print("result(",[0,1,1,0],") = ", a.think([0,1,1,0]))
 print()
-print(a.think([1,0,0,1]))
+print("result(",[1,0,0,1],") = ", a.think([1,0,0,1]))
 print()
-print(a.think([1,1,1,1]))#
+print("result(",[1,1,1,1],") = ",a.think([1,1,1,1]))#
 print()
-print(a.think([0,1,1,0]))
+print("result(",[1,1,1,0],") = ",a.think([1,1,1,0]))
 print()
-print(a.think([1,1,0,1]))
+print("result(",[1,1,0,1],") = ",a.think([1,1,0,1]))
 print()
-print(a.think([1,0,1,1]))
+print("result(",[1,0,1,1],") = ",a.think([1,0,1,1]))
 a.showWeights()

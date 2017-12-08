@@ -7,6 +7,7 @@ class Neuron:
         self.bias = bias
         self.weights = weights
         self.activation = 0
+        self.summedInput = 0
 
     def getWeights(self):
         return self.weights
@@ -41,31 +42,29 @@ class Neuron:
         return 1 / (1 + exp(-x))
 
     def act(self, input):
-        res = self.sigmoid(sum(self.weightMultiplier(input)) + self.bias)
+        res = self.sigmoid(sum(self.weightMultiplier(input)))
+        self.summedInput = sum(self.weightMultiplier(input)) + self.bias
+        #print(type(self.summedInput))
         self.activation = res#bias might not work
         return  res
 
     def getAct(self):
         return self.activation
 
+    def getSum(self):
+        return self.summedInput
+
 class Network:
 
     def __init__(self, it):
         self.iterations = it
-
-        # and gates
-        self.AndGate1 = Neuron([random.uniform(0, 1), random.uniform(0, 1)], 2)
-        self.AndGate2 = Neuron([random.uniform(0, 1), random.uniform(0, 1)], 2)
-        # or gatess
-        self.OrGate1 = Neuron([random.uniform(0, 1), random.uniform(0, 1)], 2)
-        self.OrGate2 = Neuron([random.uniform(0, 1), random.uniform(0, 1)], 2)
-        # inverters
-        self.inverter1 = Neuron([random.uniform(0, 1)], 1)
-        self.inverter2 = Neuron([random.uniform(0, 1)], 1)
-
+        self.nOUT1 = Neuron([random.uniform(0.1, 1), random.uniform(0.1, 1), random.uniform(0.1, 1)], 1)
+        self.nHID1 = Neuron([random.uniform(0.1, 1), random.uniform(0.1, 1)], 1)
+        self.nHID2 = Neuron([random.uniform(0.1, 1), random.uniform(0.1, 1)], 1)
+        self.nOUT2 = Neuron([random.uniform(0.1, 1), random.uniform(0.1, 1), random.uniform(0.1, 1)], 1)
+        self.nHID3 = Neuron([random.uniform(0.1, 1), random.uniform(0.1, 1)], 1)
         # exor, and
-        self.neuronList = [[self.AndGate1, "and1 "], [self.AndGate2, "and2 "], [self.OrGate1, "or1 "], [self.OrGate2, "or2 "], [self.inverter1, "inv1 "], [self.inverter2, "inv2"] ]
-
+        self.neuronList = [[self.nOUT1 , "n1 "] , [self.nHID1, "n2 "], [self.nHID2 , "n3 "], [self.nOUT2 , "n4 "], [self.nHID3 , "n5 "]]
         self.trainingSet = [[0, 0], [0, 1], [1, 0,], [1, 1]]
         self.trainingAnswer = [[0,0 ],[1,0],[1,0],[0,1]]
 
@@ -98,56 +97,59 @@ class Network:
             cumError = 0
 
             for data in self.trainingSet:
-                print()
                 #self.showWeights()
-                print()
-                print("desired result = ", self.trainingAnswer[i])
+                #print()
+                #print("desired result = ", self.trainingAnswer[i])
 
                 result = self.think(data)
-                print("result = ", result)
-                #print("result of distance = ", (self.calculateDistance( self.trainingAnswer[i] , result) ) )
-                cumError += (self.calculateDistance(self.trainingAnswer[i], result))
-                #cumError += math.pow((self.calculateDistance( self.trainingAnswer[i] , result) ), 2)
-                print("cumError() = ", cumError)
+                #print("result = ", result)
+                distError = math.pow(self.dist(self.trainingAnswer[i]) - self.dist(result), 2)
+                cumError += distError
+                #print("cumError() = ", cumError)
 
                 activationA = data[0]
                 activationB = data[1]
-                activationC = self.inverter1.getAct()
-                activationD = self.inverter2.getAct()
-                activationE = self.OrGate1.getAct()
-                activationF = self.OrGate2.getAct()
-                activationG = self.AndGate1.getAct()
-                activationH = self.AndGate2.getAct()
-
-                errorH = (1 - activationH) * (self.trainingAnswer[i][1] - self.AndGate2.getAct())
-                errorG = (1 - activationG) * (self.trainingAnswer[i][0] - self.AndGate1.getAct())
-                errorF = (1 - activationF) *  self.AndGate1.getWeights()[1] * errorG
-                errorE = (1 - activationE) *  self.AndGate1.getWeights()[0] * errorG
-                errorD = (1 - activationD) *  self.OrGate2.getWeights()[1]  * errorF
-                errorC = (1 - activationC) *  self.OrGate2.getWeights()[0]  * errorF
 
                 lR = 0.1
-                w1 = self.AndGate1.getWeights()[0] + lR * activationE * errorG #eg
-                w2 = self.AndGate1.getWeights()[1] + lR  * activationF *  errorG #fg
-                w3 = self.OrGate1.getWeights()[0] + lR * activationA * errorE #ae
-                w4 = self.OrGate1.getWeights()[1] + lR  * activationB * errorE#be
-                w5 = self.OrGate2.getWeights()[0] + lR  * activationC * errorF #cf
-                w6 = self.OrGate2.getWeights()[1] + lR  * activationD * errorF #df
-                w7 = self.inverter1.getWeights()[0] + lR * activationA * errorC #ac
-                w8 = self.inverter2.getWeights()[0] + lR  * activationB * errorD #bd
-                w9 = self.AndGate2.getWeights()[0] + lR * activationA * errorH #ah
-                w10 = self.AndGate2.getWeights()[1] + lR * activationB * errorH #bh
 
-                self.AndGate1.updateWeights([w1, w2])
-                self.OrGate1.updateWeights([w3, w4])
-                self.OrGate2.updateWeights([w5, w6])
-                self.inverter1.updateWeights([w7])
-                self.inverter2.updateWeights([w8])
-                self.AndGate2.updateWeights([w9, w10])
+                errorOUT =    (self.trainingAnswer[i][0] - self.nOUT1.getAct() ) * ( 1 - self.nOUT1.getAct() ) * self.nOUT1.getAct()
+                errorOUT2 =   (self.trainingAnswer[i][1] - self.nOUT2.getAct() ) * (1 - self.nOUT2.getAct()  ) * self.nOUT2.getAct()
+
+                summError1 =  (errorOUT * self.nOUT1.getWeights()[0] *  (1 - self.nHID1.getAct()) * self.nHID1.getAct() ) + (errorOUT2 * self.nOUT1.getWeights()[0] *  (1 - self.nHID1.getAct()) * self.nHID1.getAct() )
+                summError2 =  (errorOUT * self.nOUT1.getWeights()[1] *  (1 - self.nHID2.getAct()) * self.nHID2.getAct() ) + (errorOUT2 * self.nOUT1.getWeights()[1] *  (1 - self.nHID2.getAct()) * self.nHID2.getAct() )
+                summError3 =  (errorOUT * self.nOUT1.getWeights()[2] *  (1 - self.nHID3.getAct()) * self.nHID3.getAct()) + (errorOUT2 * self.nOUT1.getWeights()[2] *  (1 - self.nHID3.getAct())  * self.nHID3.getAct())
+
+
+                w1 = self.nOUT1.getWeights()[0] + lR * (self.nHID1.getAct() * errorOUT)
+                w2 = self.nOUT1.getWeights()[1] + lR * (self.nHID2.getAct() * errorOUT)
+                w3 = self.nOUT1.getWeights()[2] + lR * (self.nHID3.getAct() * errorOUT)
+
+                w4 = self.nHID1.getWeights()[0] + lR * (activationA * summError1)
+                w5 = self.nHID1.getWeights()[1] + lR * (activationB * summError1)
+
+                w6 = self.nHID2.getWeights()[0] + lR * (activationA * summError2)
+                w7 = self.nHID2.getWeights()[1] + lR * (activationB * summError2)
+
+                w11= self.nHID3.getWeights()[0] + lR * (activationA * summError3)
+                w12= self.nHID3.getWeights()[1] + lR * (activationA * summError3)
+
+                w8 = self.nOUT2.getWeights()[0] + lR * (self.nHID1.getAct() * errorOUT2)
+                w9 = self.nOUT2.getWeights()[1] + lR * (self.nHID2.getAct() * errorOUT2)
+                w10= self.nOUT2.getWeights()[2] + lR * (self.nHID3.getAct() * errorOUT2)
+
+
+                self.nOUT1.updateWeights([w1, w2, w3])
+                self.nOUT2.updateWeights([w8, w9, w10])
+                self.nHID1.updateWeights([w4, w5])
+                self.nHID2.updateWeights([w6, w7])
+                #self.nHID2.updateWeights([w9, w10])
+                self.nHID3.updateWeights([w11, w12])
 
                 i += 1
 
-            if cumError < 0.1:
+
+                        #0.03 for lr 0.01
+            if cumError < 0.01:
                 print("cum error is low")
                 return True
 
@@ -156,24 +158,18 @@ class Network:
         print("done traing")
 
     def think(self,input):
-        print("thinking about ", input)
-        result = [ self.AndGate1.act([self.OrGate1.act([input[0], input[1]]), self.OrGate2.act([self.inverter1.act([input[0]]), self.inverter2.act([input[1]])])]) , self.AndGate2.act([input[0], input[1]]) ]
+
+        result = [self.nOUT1.act([self.nHID1.act([input[0],input[1]]), self.nHID2.act([input[0],input[1]]), self.nHID3.act([input[0],input[1]])  ] ) , self.nOUT2.act([self.nHID1.act([input[0],input[1]]), self.nHID2.act([input[0],input[1]]), self.nHID3.act([input[0],input[1]])  ])]
 
         return result
-#
-#  ------------
-#            ---(or)e
-#  ------------
-#  ---(inv)c         ------ (and)g
-#          ---- (or)f
-#  ---(inv)d
-#-----------------------
-#                       ----(and)h
-#-----------------------
-a = Network(100000000)
+
+
+
+a = Network(3000000)
 
 a.showWeights()
 a.train()
+a.showWeights()
 print(a.think([0,0]))#
 print()
 print(a.think([1,1]))
