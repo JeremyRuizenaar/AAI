@@ -21,19 +21,7 @@ class Neuron:
 
         return result
 
-    def update(self, data ,inputSum, actual, desired):
-        print("updating neuron")
 
-        learnRate = 0.01
-        for x in range(0, len(self.weights)):
-
-            errorSig = ( desired - actual ) *  actual * ( 1 - actual )
-            tmp = float(learnRate * errorSig *   data[x])
-            self.weights[x] += tmp
-
-        print("new weights = " ,self.weights)
-        print("-" * 50)
-        print()
 
     def updateWeights(self, weights):
         self.weights = weights[:]
@@ -44,8 +32,7 @@ class Neuron:
     def act(self, input):
         res = self.sigmoid(sum(self.weightMultiplier(input)))
         self.summedInput = sum(self.weightMultiplier(input)) + self.bias
-        #print(type(self.summedInput))
-        self.activation = res#bias might not work
+        self.activation = res
         return  res
 
     def getAct(self):
@@ -115,9 +102,9 @@ class Network:
                 errorOUT =    (self.trainingAnswer[i][0] - self.nOUT1.getAct() ) * ( 1 - self.nOUT1.getAct() ) * self.nOUT1.getAct()
                 errorOUT2 =   (self.trainingAnswer[i][1] - self.nOUT2.getAct() ) * (1 - self.nOUT2.getAct()  ) * self.nOUT2.getAct()
 
-                summError1 =  (errorOUT * self.nOUT1.getWeights()[0] *  (1 - self.nHID1.getAct()) * self.nHID1.getAct() ) + (errorOUT2 * self.nOUT1.getWeights()[0] *  (1 - self.nHID1.getAct()) * self.nHID1.getAct() )
-                summError2 =  (errorOUT * self.nOUT1.getWeights()[1] *  (1 - self.nHID2.getAct()) * self.nHID2.getAct() ) + (errorOUT2 * self.nOUT1.getWeights()[1] *  (1 - self.nHID2.getAct()) * self.nHID2.getAct() )
-                summError3 =  (errorOUT * self.nOUT1.getWeights()[2] *  (1 - self.nHID3.getAct()) * self.nHID3.getAct()) + (errorOUT2 * self.nOUT1.getWeights()[2] *  (1 - self.nHID3.getAct())  * self.nHID3.getAct())
+                summError1 =  (errorOUT * self.nOUT1.getWeights()[0] *  (1 - self.nHID1.getAct()) * self.nHID1.getAct() ) + (errorOUT2 * self.nOUT2.getWeights()[0] *  (1 - self.nHID1.getAct()) * self.nHID1.getAct() )
+                summError2 =  (errorOUT * self.nOUT1.getWeights()[1] *  (1 - self.nHID2.getAct()) * self.nHID2.getAct() ) + (errorOUT2 * self.nOUT2.getWeights()[1] *  (1 - self.nHID2.getAct()) * self.nHID2.getAct() )
+                summError3 =  (errorOUT * self.nOUT1.getWeights()[2] *  (1 - self.nHID3.getAct()) * self.nHID3.getAct()) + (errorOUT2 * self.nOUT2.getWeights()[2] *  (1 - self.nHID3.getAct())  * self.nHID3.getAct())
 
 
                 w1 = self.nOUT1.getWeights()[0] + lR * (self.nHID1.getAct() * errorOUT)
@@ -131,7 +118,7 @@ class Network:
                 w7 = self.nHID2.getWeights()[1] + lR * (activationB * summError2)
 
                 w11= self.nHID3.getWeights()[0] + lR * (activationA * summError3)
-                w12= self.nHID3.getWeights()[1] + lR * (activationA * summError3)
+                w12= self.nHID3.getWeights()[1] + lR * (activationB * summError3)
 
                 w8 = self.nOUT2.getWeights()[0] + lR * (self.nHID1.getAct() * errorOUT2)
                 w9 = self.nOUT2.getWeights()[1] + lR * (self.nHID2.getAct() * errorOUT2)
@@ -142,14 +129,13 @@ class Network:
                 self.nOUT2.updateWeights([w8, w9, w10])
                 self.nHID1.updateWeights([w4, w5])
                 self.nHID2.updateWeights([w6, w7])
-                #self.nHID2.updateWeights([w9, w10])
                 self.nHID3.updateWeights([w11, w12])
 
                 i += 1
 
 
                         #0.03 for lr 0.01
-            if cumError < 0.01:
+            if cumError < 0.0005:
                 print("cum error is low")
                 return True
 
@@ -178,4 +164,18 @@ print(a.think([0,1]))
 print()
 print(a.think([1,0]))
 print()
+
+# cum error is low
+# n1  [28.437995829262775, -24.29353228714799, -11.954866729922012]
+# n2  [3.0821444176179944, -2.2927281972842395]
+# n3  [9.4068273721646545, -6.8759642233459228]
+# n4  [-28.46222729670977, 24.355339421452658, -59.744063052461783]
+# n5  [-6.5973416544284955, -6.6880259162804752]
+# [0.019739404302838867, 1.3644014551263126e-14]
+#
+# [0.049945412603071677, 0.95194007310536644]
+#
+# [0.92881355351731265, 0.065377069578963901]
+#
+# [0.94700838803301257, 0.050106243011234286]
 

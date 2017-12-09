@@ -21,19 +21,6 @@ class Neuron:
 
         return result
 
-    def update(self, data ,inputSum, actual, desired):
-        print("updating neuron")
-
-        learnRate = 0.01
-        for x in range(0, len(self.weights)):
-
-            errorSig = ( desired - actual ) *  actual * ( 1 - actual )
-            tmp = float(learnRate * errorSig *   data[x])
-            self.weights[x] += tmp
-
-        print("new weights = " ,self.weights)
-        print("-" * 50)
-        print()
 
     def updateWeights(self, weights):
         self.weights = weights[:]
@@ -163,3 +150,24 @@ print()
 print(a.think([1,0]))
 print()
 
+# result =  0.00325848222347
+# result =  0.988683269548
+# result =  0.988683263576
+# result =  0.0152723778513
+# cumError(total) =  0.0005000001430416899
+# ------------------------- 3035833 -------------------------
+# result =  0.00325848153307
+# result =  0.988683271443
+# result =  0.988683265471
+# result =  0.0152723753055
+# cum error is low
+# n1  [-57.927244505673208, 46.480783725380874]
+# n2  [0.97001617443763311, 0.9700142058858463]
+# n3  [8.8983126664996242, 8.8978592552527207]
+# 0.00325848084266
+#
+# 0.015243805359
+#
+# 0.988683283551
+#
+# 0.988683061456
