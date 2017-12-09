@@ -84,6 +84,7 @@ class Neuron:
 
     def getId(self):
         return self.id
+
     def getError(self):
         return self.error
 
@@ -111,21 +112,49 @@ class Network:
         self.iterations = it
 
 
-        self.nOUT1 = Neuron(5, 0)
-        self.nOUT2 = Neuron(5, 1)
-        self.nOUT3 = Neuron(5, 2)
-        self.nHID1 = Neuron(4, 0)
-        self.nHID2 = Neuron(4, 1)
-        self.nHID3 = Neuron(4, 2)
-        self.nHID4 = Neuron(4, 3)
-        self.nHID5 = Neuron(4, 4)
+        self.nOUT1 = Neuron(6, 0)
+        self.nOUT2 = Neuron(6, 1)
+        self.nOUT3 = Neuron(6, 2)
+
+        self.nHID1 = Neuron(6, 0)
+        self.nHID2 = Neuron(6, 1)
+        self.nHID3 = Neuron(6, 2)
+        self.nHID4 = Neuron(6, 3)
+        self.nHID5 = Neuron(6, 4)
+        self.nHID6 = Neuron(6, 5)
+
+        self.nHID7 = Neuron(4, 0)
+        self.nHID8 = Neuron(4, 1)
+        self.nHID9 = Neuron(4, 2)
+        self.nHID10 = Neuron(4, 3)
+        self.nHID11 = Neuron(4, 4)
+        self.nHID12 = Neuron(4, 5)
+
+        self.nHID13 = Neuron(6, 0)
+        self.nHID14 = Neuron(6, 1)
+        self.nHID15 = Neuron(6, 2)
+        self.nHID16 = Neuron(6, 3)
+        self.nHID17 = Neuron(6, 4)
+        self.nHID18 = Neuron(6, 5)
+
+
+
 
         self.outputLayer = [self.nOUT1, self.nOUT2, self.nOUT3]
-        self.FirsthiddenLayer = [self.nHID1, self.nHID2, self.nHID3, self.nHID4, self.nHID5]
+        self.thirdHiddenLayer = [self.nHID13, self.nHID14, self.nHID15, self.nHID16, self.nHID17, self.nHID18]
+        self.secondHiddenLayer = [self.nHID1, self.nHID2, self.nHID3, self.nHID4, self.nHID5, self.nHID6]
+        self.firstHiddenLayer = [self.nHID7, self.nHID8, self.nHID9, self.nHID10, self.nHID11, self.nHID12]
+
+        self.hiddenLayers = [[self.nHID7, self.nHID8, self.nHID9, self.nHID10, self.nHID11, self.nHID12],
+                             [self.nHID1, self.nHID2, self.nHID3, self.nHID4, self.nHID5, self.nHID6],
+                             [self.nHID13, self.nHID14, self.nHID15, self.nHID16, self.nHID17, self.nHID18],
+                             [self.nOUT1, self.nOUT2, self.nOUT3]
+                             ]
 
 
         self.neuronList = [[self.nOUT1 , "out1 "] , [self.nOUT2 , "out2 "], [self.nOUT3 , "out3 "],
                            [self.nHID1, "hid1 "], [self.nHID2 , "hid2 "],  [self.nHID3 , "hid3 "],  [self.nHID4 , "hid4 "]]
+
         self.trainingSet = data
         self.trainingAnswer = dataLabels
 
@@ -151,20 +180,61 @@ class Network:
     def sDerivative(self, x):
         return x * (1 - x)
 
-    def backPropagate(self, res, answer):
-        for output in self.outputLayer:
-            output.calcErrorOutput(res, answer)
+    def forwardPropagateFirstLayer(self,  input):
+        for node in self.hiddenLayers[0]:
+            node.act([ele for ele in input])
 
-        for hidden in self.FirsthiddenLayer:
-            hidden.calcErrorHidden(self.outputLayer)
+    def forwardPropagateLayer(self, layer, prevLayer):
+        for node in layer:
+            node.act( [prev.activation for prev in prevLayer  ]  )
+
+    def forwardPropagateLayers(self):
+        for i in range(0, len(self.hiddenLayers)-1):
+            self.forwardPropagateLayer(self.hiddenLayers[i+1], self.hiddenLayers[i])
+
+    def forwardPropagateNetwork(self, input):
+
+        self.forwardPropagateFirstLayer(input)
+        self.forwardPropagateLayers()
+
+        # self.forwardPropagateLayer(self.secondHiddenLayer, self.firstHiddenLayer)
+        # self.forwardPropagateLayer(self.thirdHiddenLayer, self.secondHiddenLayer)
+        # self.forwardPropagateLayer(self.outputLayer, self.thirdHiddenLayer)
+
+
+        return [n.activation for n in self.outputLayer]
+
+    def backPropagateOutputLayer(self, layer, res, ans):
+        for node in layer:
+            node.calcErrorOutput(res, ans)
+
+    def backPropagateLayer(self, layer , prevLayer):
+        for node in layer:
+            node.calcErrorHidden(prevLayer)
+
+    # def backPropagateLayers(self):
+    #     for i in range(0, len(self.hiddenLayers)-1):
+    #         self.backPropagateLayer(self.hiddenLayers[i+1], self.hiddenLayers[i])
+
+    def backPropagateNetwork(self, res, answer):
+
+        self.backPropagateOutputLayer(self.outputLayer ,res, answer)
+        #self.backPropagateLayers()
+
+
+        #self.backPropagateOutputLayer(self.outputLayer, res, answer)
+        self.backPropagateLayer(self.thirdHiddenLayer, self.outputLayer)
+        self.backPropagateLayer(self.secondHiddenLayer, self.thirdHiddenLayer)
+        self.backPropagateLayer(self.firstHiddenLayer, self.secondHiddenLayer)
 
     def updateWeights(self, rate, input):
         for node in self.outputLayer:
-            node.setWeightsOuterAndHiddenLayer(rate, self.FirsthiddenLayer)
+            node.setWeightsOuterAndHiddenLayer(rate, self.secondHiddenLayer)
 
+        for node in self.secondHiddenLayer:
+            node.setWeightsOuterAndHiddenLayer(rate, self.firstHiddenLayer)
 
-
-        for node in self.FirsthiddenLayer:
+        for node in self.firstHiddenLayer:
             node.setWeightsInputLayer(rate, input)
 
     def train(self):
@@ -179,49 +249,206 @@ class Network:
 
             for data in self.trainingSet:
 
-                result = self.think(data)
+                #result = self.think(data)
+                result = self.forwardPropagateNetwork(data)
                 distError = math.pow(self.dist(self.trainingAnswer[i]) - self.dist(result), 2)
                 cumError += distError
 
                 lR = 0.5
 
-                self.backPropagate(result, self.trainingAnswer[i])
+                self.backPropagateNetwork(result, self.trainingAnswer[i])
 
                 self.updateWeights(lR , data)
 
                 i += 1
 
-            if cumError < 0.02:
+            if cumError < 0.05:
                 return True
+
             print("cumulativeError(total) = ", cumError)
         print("done traing")
 
     def think(self,input):
 
-        result = [self.nOUT1.act([self.nHID1.act([input[0], input[1], input[2], input[3]]),
-                                  self.nHID2.act([input[0], input[1], input[2], input[3]]),
-                                  self.nHID3.act([input[0], input[1], input[2], input[3]]),
-                                  self.nHID4.act([input[0], input[1], input[2], input[3]]),
-                                  self.nHID5.act([input[0], input[1], input[2], input[3]])
+        result = [self.nOUT1.act([self.nHID1.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
 
+                                                  ]),
+                                  self.nHID2.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
+                                  self.nHID3.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
+                                  self.nHID4.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
+                                  self.nHID5.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
+                                  self.nHID6.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
 
                                   ] ) ,
+                  self.nOUT2.act([self.nHID1.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
 
-                  self.nOUT2.act([self.nHID1.act([input[0], input[1], input[2], input[3]]),
-                                  self.nHID2.act([input[0], input[1], input[2], input[3]]),
-                                  self.nHID3.act([input[0], input[1], input[2], input[3]]),
-                                  self.nHID4.act([input[0], input[1], input[2], input[3]]),
-                                  self.nHID5.act([input[0], input[1], input[2], input[3]])
+                                                  ]),
+                                  self.nHID2.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
 
-                                  ] )  ,
+                                                  ]),
+                                  self.nHID3.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
 
-                  self.nOUT3.act([self.nHID1.act([input[0], input[1], input[2], input[3]]),
-                                  self.nHID2.act([input[0], input[1], input[2], input[3]]),
-                                  self.nHID3.act([input[0], input[1], input[2], input[3]]),
-                                  self.nHID4.act([input[0], input[1], input[2], input[3]]),
-                                  self.nHID5.act([input[0], input[1], input[2], input[3]])
+                                                  ]),
+                                  self.nHID4.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
 
-                                  ] )  , ]
+                                                  ]),
+                                  self.nHID5.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
+                                  self.nHID6.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
+
+                                  ]),
+                  self.nOUT3.act([self.nHID1.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
+                                  self.nHID2.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
+                                  self.nHID3.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
+                                  self.nHID4.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
+                                  self.nHID5.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
+                                  self.nHID6.act([self.nHID7.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID8.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID9.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID10.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID11.act([input[0], input[1], input[2], input[3]]),
+                                                  self.nHID12.act([input[0], input[1], input[2], input[3]])
+
+                                                  ]),
+
+                                  ])]
+
+
+
+        # result = [self.nOUT1.act([self.nHID1.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID2.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID3.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID4.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID5.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID5.act([input[0], input[1], input[2], input[3]])
+        #
+        #                           ]),
+        #
+        #           self.nOUT2.act([self.nHID1.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID2.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID3.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID4.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID5.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID5.act([input[0], input[1], input[2], input[3]])
+        #
+        #                           ]),
+        #
+        #           self.nOUT3.act([self.nHID1.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID2.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID3.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID4.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID5.act([input[0], input[1], input[2], input[3]]),
+        #                           self.nHID5.act([input[0], input[1], input[2], input[3]])
+        #
+        #                           ]), ]
         return result
 
 
