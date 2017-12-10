@@ -21,30 +21,13 @@ for x in range(5,10):
 for x in range(10,15):
     testLabels.append([0, 0, 1,])
 
-
-# for x in range(0, 15):
-#     #tmp = []
-#     get = random.randint(20, 80)
-#     testSet.append([data[get],dataLabels[get] ])
-#     data = np.delete(data, get)
-#     print("len of data ", len(data) , "after ", x)
-#     del dataLabels[get]
-#     #dataLabels = np.delete(dataLabels, get)
-#
-#
-
-
-# print("data = ", data)
-# print("datalabels = ", dataLabels)
-# print("test = ", test)
-# print("testset = ", testLabels)
-# print("len of data and labels and test and testset = ", len(data), len(dataLabels), len(test), len(testLabels))
-
 class Neuron:
 
     def __init__(self, weights, id):
+        a = 0.2
+        b = 0.7
         self.id = id
-        self.weights = [random.uniform(0.2, 0.7) for x in range(0 , weights)]
+        self.weights = [random.uniform(a, b) for x in range(0 , weights)]
         self.activation = 0
         self.summedInput = 0
         self.error = 0
@@ -61,15 +44,14 @@ class Neuron:
 
         return result
 
-    def updateWeights(self, weights):
-        self.weights = weights[:]
-
     def sigmoid(self, x):
+        #sigmoid activation function
         return 1 / (1 + exp(-x))
 
     def act(self, input):
+        # calculate neuron response to it summed inputs and its weights
         res = self.sigmoid(sum(self.weightMultiplier(input)))
-        self.summedInput = sum(self.weightMultiplier(input)) #+ self.bias
+        self.summedInput = sum(self.weightMultiplier(input))
         self.activation = res
         return  res
 
@@ -80,6 +62,7 @@ class Neuron:
         return self.summedInput
 
     def sDerivative(self, x):
+        #derivative of the sigmoid function
         return x * (1 - x)
 
     def getId(self):
@@ -88,71 +71,71 @@ class Neuron:
     def getError(self):
         return self.error
 
-    def calcErrorOutput(self, res, answer):
+    def calcErrorOutput(self, answer):
+        # weighted derivative of an ooutput neuron
         self.error = (answer[self.id] - self.activation ) * self.sDerivative(self.activation)
 
     def calcErrorHidden(self, nodes):
         self.error = 0
+        #weighted partial derivative
         for node in nodes:
             self.error += (node.getError() * node.getWeights()[self.id] * self.sDerivative(self.activation) )
 
     def setWeightsOuterAndHiddenLayer(self, rate, nodes):
+        #set the weights of an outer and hiddenlayer
         for node in nodes:
             self.weights[node.getId()] += rate * (node.getAct() * self.error)
 
     def setWeightsInputLayer(self, rate, input):
-        i = 0
+        #set the weight of neuron connected to the inputs
+        index = 0
         for val in input:
-            self.weights[i] += rate * (val * self.error)
-            i+= 1
+            self.weights[index] += rate * (val * self.error)
+            index+= 1
 
 class Network:
 
     def __init__(self, it):
         self.iterations = it
-        self.learnRate = 0.5
+        self.learnRate = 0.4
         self.errorLimit = 0.1
 
-        self.nOUT1 = Neuron(6, 0)
-        self.nOUT2 = Neuron(6, 1)
-        self.nOUT3 = Neuron(6, 2)
+        # self.nOUT1 = Neuron(6, 0)
+        # self.nOUT2 = Neuron(6, 1)
+        # self.nOUT3 = Neuron(6, 2)
 
-        self.nHID1 = Neuron(6, 0)
-        self.nHID2 = Neuron(6, 1)
-        self.nHID3 = Neuron(6, 2)
-        self.nHID4 = Neuron(6, 3)
-        self.nHID5 = Neuron(6, 4)
-        self.nHID6 = Neuron(6, 5)
+        # self.nHID1 = Neuron(6, 0)
+        # self.nHID2 = Neuron(6, 1)
+        # self.nHID3 = Neuron(6, 2)
+        # self.nHID4 = Neuron(6, 3)
+        # self.nHID5 = Neuron(6, 4)
+        # self.nHID6 = Neuron(6, 5)
 
-        self.nHID7 = Neuron(4, 0)
-        self.nHID8 = Neuron(4, 1)
-        self.nHID9 = Neuron(4, 2)
-        self.nHID10 = Neuron(4, 3)
-        self.nHID11 = Neuron(4, 4)
-        self.nHID12 = Neuron(4, 5)
+        # self.nHID7 = Neuron(4, 0)
+        # self.nHID8 = Neuron(4, 1)
+        # self.nHID9 = Neuron(4, 2)
+        # self.nHID10 = Neuron(4, 3)
+        # self.nHID11 = Neuron(4, 4)
+        # self.nHID12 = Neuron(4, 5)
 
-        self.nHID13 = Neuron(6, 0)
-        self.nHID14 = Neuron(6, 1)
-        self.nHID15 = Neuron(6, 2)
-        self.nHID16 = Neuron(6, 3)
-        self.nHID17 = Neuron(6, 4)
-        self.nHID18 = Neuron(6, 5)
-
-
+        # self.nHID13 = Neuron(6, 0)
+        # self.nHID14 = Neuron(6, 1)
+        # self.nHID15 = Neuron(6, 2)
+        # self.nHID16 = Neuron(6, 3)
+        # self.nHID17 = Neuron(6, 4)
+        # self.nHID18 = Neuron(6, 5)
 
 
-        self.hiddenLayers = [[self.nHID7, self.nHID8, self.nHID9, self.nHID10, self.nHID11, self.nHID12],
-                             [self.nHID1, self.nHID2, self.nHID3, self.nHID4, self.nHID5, self.nHID6],
-                             #[self.nHID13, self.nHID14, self.nHID15, self.nHID16, self.nHID17, self.nHID18],
-                             [self.nOUT1, self.nOUT2, self.nOUT3]
-                             ]
 
-
-        self.neuronList = [[self.nOUT1 , "out1 "] , [self.nOUT2 , "out2 "], [self.nOUT3 , "out3 "],
-                           [self.nHID1, "hid1 "], [self.nHID2 , "hid2 "],  [self.nHID3 , "hid3 "],  [self.nHID4 , "hid4 "]]
+        #network layer index[0] is firsts layer index[1] is second layer and so on and  index[-1] = outputlayer
+        self.networkLayers = [[Neuron(4, 0), Neuron(4, 1), Neuron(4, 2), Neuron(4, 3), Neuron(4, 4), Neuron(4, 5)],
+                              [Neuron(6, 0), Neuron(6, 1), Neuron(6, 2), Neuron(6, 3), Neuron(6, 4), Neuron(6, 5)],
+                              #[Neuron(4, 0), Neuron(4, 1), Neuron(4, 2)],
+                              [Neuron(6, 0), Neuron(6, 1), Neuron(6, 2)]
+                              ]
 
         self.trainingSet = data
-        self.trainingAnswer = dataLabels
+        self.trainingAnswers = dataLabels
 
     def calculateDistance(self, a, b):
         # calcululate difference between two classes represented by two lists
@@ -162,7 +145,8 @@ class Network:
             result += delta * delta
         return sqrt(result)
 
-    def dist(self, a):
+    def lenOfVector(self, a):
+        #return the magnitude of a vector
         tmp = 0
         for i in a:
             tmp += i*i
@@ -170,119 +154,137 @@ class Network:
         return res
 
     def showWeights(self):
-        for neuron in self.neuronList:
-            print(neuron[1] ,neuron[0].getWeights())
+        for layer in self.networkLayers:
+            for neuron in layer:
+                print(neuron.getWeights())
 
     def sDerivative(self, x):
         return x * (1 - x)
 
     def forwardPropagateFirstLayer(self,  input):
-        for node in self.hiddenLayers[0]:
+        for node in self.networkLayers[0]:
             node.act([ele for ele in input])
 
     def forwardPropagateLayer(self, layer, prevLayer):
+        # forward propagate each node in the layer
         for node in layer:
             node.act( [prev.activation for prev in prevLayer  ]  )
 
     def forwardPropagateLayers(self):
-        for i in range(0, len(self.hiddenLayers)-1):
-            self.forwardPropagateLayer(self.hiddenLayers[i+1], self.hiddenLayers[i])
+        # forwardpropagate 2  connected layers
+        for i in range(0, len(self.networkLayers)-1):
+            self.forwardPropagateLayer(self.networkLayers[i + 1], self.networkLayers[i])
 
     def forwardPropagateNetwork(self, input):
-
+        # forard propagate the network starting with the input layer
         self.forwardPropagateFirstLayer(input)
         self.forwardPropagateLayers()
+        #return the activation of each node in the output layer
+        return [n.activation for n in self.networkLayers[-1]]
 
-        return [n.activation for n in self.hiddenLayers[-1]]
+    def backPropagateOutputLayer(self, ans):
+        # backpropagate each node in the outputlayer
+        for node in self.networkLayers[-1]:
+            node.calcErrorOutput( ans)
 
-    def backPropagateOutputLayer(self,  res, ans):
-        for node in self.hiddenLayers[-1]:
-            node.calcErrorOutput(res, ans)
-
-    def backPropagateLayer(self, layer , prevLayer):
+    def backPropagateNodes(self, layer, prevLayer):
+        #backpropagate each node in the layer
         for node in layer:
             node.calcErrorHidden(prevLayer)
 
     def backPropagateLayers(self):
-        for i in range(len(self.hiddenLayers) -1 , 0 , -1):
-            self.backPropagateLayer(self.hiddenLayers[i-1], self.hiddenLayers[i])
+        #backpropagate 2  connected layers
+        for i in range(len(self.networkLayers) -1 , 0 , -1):
+            self.backPropagateNodes(self.networkLayers[i - 1], self.networkLayers[i])
 
-    def backPropagateNetwork(self, res, answer):
-
-        self.backPropagateOutputLayer(res, answer)
+    def backPropagateNetwork(self, i):
+        #back propagate the output layer and each following layer
+        self.backPropagateOutputLayer(self.trainingAnswers[i])
         self.backPropagateLayers()
 
-    def updateWeights(self, rate, input):
-        for node in self.hiddenLayers[0]:
-            node.setWeightsInputLayer(rate, input)
+    def updateWeights(self, input):
+        #update the weight for each node in each layer
+        for node in self.networkLayers[0]:
+            node.setWeightsInputLayer(self.learnRate, input)
 
-        for x in range(1, len(self.hiddenLayers)):
-            for node in self.hiddenLayers[x]:
-                node.setWeightsOuterAndHiddenLayer(rate, self.hiddenLayers[x-1] )
+        for x in range(1, len(self.networkLayers)):
+            for node in self.networkLayers[x]:
+                node.setWeightsOuterAndHiddenLayer(self.learnRate, self.networkLayers[x - 1])
 
-
-
-    def train(self):
-        print("training")
-        print()
-
-        for x in range(0, self.iterations):
-            print("-"*25, " epoch ", x , "-"*25)
-            # self.showWeights()
-            i = 0
-            cumError = 0
-
-            for data in self.trainingSet:
-                result = self.forwardPropagateNetwork(data)
-                self.backPropagateNetwork(result, self.trainingAnswer[i])
-                self.updateWeights(self.learnRate , data)
-                distError = math.pow(self.dist(self.trainingAnswer[i]) - self.dist(result), 2)
-                cumError += distError
-
-                i += 1
-
-            if cumError < self.errorLimit:
-                return True
-
-            print("cumulativeError(total) = ", cumError)
-        print("done traing")
+    def calculateError(self, i , res):
+        return math.pow(self.lenOfVector(self.trainingAnswers[i]) - self.lenOfVector(res), 2)
 
     def think(self,input):
         return self.forwardPropagateNetwork(input)
 
+    def train(self):
+        print("training")
+        for x in range(0, self.iterations):
+            print("-"*25, " epoch ", x , "-"*25)
+            # self.showWeights()
+            exampleCounter = 0
+            cumulativeError = 0
+
+            for data in self.trainingSet:
+
+                result = self.forwardPropagateNetwork(data)
+                self.backPropagateNetwork(exampleCounter)
+                self.updateWeights(data)
+
+                cumulativeError += self.calculateError(exampleCounter, result)
+                exampleCounter += 1
+
+            if cumulativeError < self.errorLimit:
+                return True
+
+            print("cumulativeError(total) = ", cumulativeError)
+        print("maximum training iterations passed")
 
 
 
-a = Network(3000000)
-#
-a.showWeights()
-a.train()
-a.showWeights()
 
-for x in range(0, 15):
-    result = a.think(test[x])
-    print("aproximated result of ", test[x], " = " ,result ,)
-
-    for x in range(0, len(result)):
-        if result[x] <= 0.5:
-            result[x] = 0
+def validateAnswer(a , b):
+    #check if 2 lists have the same values
+    for x in range(0, len(a)):
+        if a[x] == b[x]:
+            continue
         else:
-            result[x] = 1
+            return False
+    return True
 
-    print(" rounded result = ", result)
-    print( " correct result = ", testLabels[x] ) #
+def validateNeuralnetwork(network):
+    correctPredictions = 0
+    for i in range(0, 15):
+        print("starting on example ", i )
+        result = network.think(test[i])
+        #print("aproximated result of ", test[i], " = " ,result ,)
+
+        # round the result to 0 or 1
+        for x in range(0, len(result)):
+            if result[x] <= 0.5:
+                result[x] = 0
+            else:
+                result[x] = 1
+
+        if validateAnswer(result, testLabels[i] ) == True:
+            correctPredictions += 1
+
+        print(" rounded result = ", result)
+        print(" correct result = ", testLabels[i] )
+    print("classified correctly ", ((correctPredictions / len(testLabels)) * 100), "%")
+# if the network hangs on a local minumum restart or change the random range in the neuron init weights
+network = Network(3000000)
+network.train()
+validateNeuralnetwork(network)
+
+    # classified
+    # correctly
+    # 93.33333333333333 %
+    #
+    #fully connected with 2 hiddenlayers consisting of 6 nodes each en 3 output nodes
 
 
-# cumError(total) =  0.0800013515723169
-# -------------------------  epoch  2129 -------------------------
-# cum error is low
-# out1  [-5.9494578834065903, 2.5900144362017232, -10.633899828977329, 2.6917882166645417]
-# out2  [-8.5164167028022213, -2.628542077364842, 10.398866070779281, -2.4986480384170182]
-# out3  [8.8396962166106849, -4.0580600692192199, 2.1542034314462564, -3.6880838519548611]
-# hid1  [-15.581554155020266, -29.145270378434375, 28.637032748129819, 25.924373049427547]
-# hid2  [0.92500137339579569, 0.70238817591961389, 0.51036135983887088, 0.62313231385027867]
-# hid3  [-0.94118821339060954, -2.4268049763502342, 4.0329173160717282, 1.9675707281328834]
-# hid4  [0.75590714969988215, 0.85304571209768965, 0.69651138507512156, 0.51019782273087733]
+
 # result of  [ 4.4  2.9  1.4  0.2]  =  [0.99459264307128448, 0.0062962067297559583, 0.00044105950632721599]  correct result =  [1, 0, 0]
 # result of  [ 5.1  3.3  1.7  0.5]  =  [0.99455110907319844, 0.0063436500591252934, 0.00043966176131318062]  correct result =  [1, 0, 0]
 # result of  [ 5.1  3.4  1.5  0.2]  =  [0.99486030247520463, 0.0059916983160238453, 0.00043466018433652875]  correct result =  [1, 0, 0]
@@ -300,14 +302,7 @@ for x in range(0, 15):
 # result of  [ 6.7  3.3  5.7  2.5]  =  [1.2353570284622396e-05, 0.037516260530399963, 0.96259288811686372]  correct result =  [0, 0, 1]
 #
 # Process finished with exit code 0
-#
-# out1  [6.6407932100174598, -0.076393652551962746, -4.5056081687017571, -24.20468993273883, 0.89742687842254376, 7.1448100897852482]
-# out2  [-5.9237534081575065, -1.2444903745406326, -5.0694520631699538, 5.3779341899774398, -1.7241085719062663, -2.9449498099382438]
-# out3  [-4.1635748066176506, -1.6002838479678791, 5.3064485951939222, -5.284902877399948, -2.1346194867519523, -4.8033588114313899]
-# hid1  [-1.3122217499000626, 1.1546289820865825, 1.1273612962353692, 0.69574120415462481, -8.1005927292790609, 1.2034326917967537]
-# hid2  [-0.82285736399783338, -0.66747225393025766, -0.88078230583810335, -0.75252506738589275, -2.4930448363416122, -0.6296902651529932]
-# hid3  [-7.2846105568857551, -0.43313742070789613, 2.2870252241164248, 7.3448041618547233, -2.1055907867279755, -0.51524333164584313]
-# hid4  [2.9503085494734993, 0.14199738296937253, -1.8627556721738339, -8.5076895027202628, 8.9737021890562865, 0.25967269510360208]
+
 # result of  [ 4.4  2.9  1.4  0.2]  =  [0.99525956511227198, 4.8515175093467261e-06, 0.0017879737745614256]  correct result =  [1, 0, 0]
 # result of  [ 5.1  3.3  1.7  0.5]  =  [0.99518694640599081, 4.8505802128608823e-06, 0.0018041470849734572]  correct result =  [1, 0, 0]
 # result of  [ 5.1  3.4  1.5  0.2]  =  [0.99550413638820767, 4.7532805270072286e-06, 0.0018023195124791324]  correct result =  [1, 0, 0]
