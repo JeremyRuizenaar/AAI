@@ -154,9 +154,12 @@ class Network:
         return res
 
     def showWeights(self):
+        layerId = 0
         for layer in self.networkLayers:
+            print("printing layer  = ", layerId)
+            layerId += 1
             for neuron in layer:
-                print(neuron.getWeights())
+                print("neuron with Id ", neuron.getId(), " has weights -> " , neuron.getWeights())
 
     def sDerivative(self, x):
         return x * (1 - x)
@@ -275,6 +278,7 @@ def validateNeuralnetwork(network):
 # if the network hangs on a local minumum restart or change the random range in the neuron init weights
 network = Network(3000000)
 network.train()
+network.showWeights()
 validateNeuralnetwork(network)
 
     # classified
