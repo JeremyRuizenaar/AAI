@@ -7,15 +7,15 @@ def sigmoid(x):
 def predict(x, thetaList):
     x = np.array(x)
     input = True
-    a = 0
-    thetaCount = 0
 
     for theta in thetaList:
         theta = np.array(theta)
-        #print("processsing theta ", thetaCount )
-        thetaCount += 1
+
         if input == True:
-            act = sigmoid(np.dot(theta, x))
+            x_prime = np.append(1, x)
+            act = sigmoid(np.dot(theta, x_prime))
+
+
             input = False
             if len(thetaList) == 1:
                 return act
@@ -26,17 +26,15 @@ def predict(x, thetaList):
 
 
 
-#x = np.array([10, 1 ,0, 0])
-theta = np.array([1, -15, -15, -15])
-#theta1 = np.array([1, -15])
-thetaList = [theta] #, theta1]
+theta = np.array([[1, -1, -1, -1]])
+thetaList = [theta ] #, theta1]
 
 
 
 for q in range(0, 2):
     for r in range(0, 2):
         for s in range(0, 2):
-            x = [10, q ,r, s]
-            print(x[1:],  " --> ", predict(x,thetaList))
+            x = [ q ,r, s]
+            print(x,  " --> ", predict(x,thetaList))
 
 
